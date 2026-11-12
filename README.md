@@ -6,19 +6,19 @@ A high-performance, real-time noise reduction and remote audio streaming engine 
 
 NoiseReductionEngine follows Clean Architecture principles to separate low-level Linux audio capture, real-time digital signal processing, and UDP network delivery:
 
-1. **Infrastructure Layer (Native Hardware Interop):** `AlsaAudioCaptureService` captures raw 16-bit PCM (44.1 kHz, Mono) audio directly via `libasound.so.2` (P/Invoke).
-2. **Core Layer (Triple DSP Pipeline):**
+   **Infrastructure Layer (Native Hardware Interop):** `AlsaAudioCaptureService` captures raw 16-bit PCM (44.1 kHz, Mono) audio directly via `libasound.so.2` (P/Invoke).
+   **Core Layer (Triple DSP Pipeline):**
    - `MovingAverageFilter`: Time-domain high-frequency spike smoothing.
    - `NoiseGateFilter`: Low-amplitude background noise suppression during silence.
    - `FftSpectrumFilter`: MathNet Forward/Inverse FFT Band-Pass filter (80 Hz - 4000 Hz) isolating human voice and suppressing hum/hiss.
-3. **Infrastructure Layer (Network Streaming):**
+   **Infrastructure Layer (Network Streaming):**
    - `UdpSignalStreamService`: Streams raw and filtered waveforms to UDP Port `5005`.
    - `NetworkAudioStreamService`: Streams 12-byte custom header (`SequenceNumber` + `Timestamp`) + PCM audio to UDP Port `5006`.
-4. **Python Clients:**
+   **Python Clients:**
    - `oscilloscope.py`: 100 FPS real-time PyQtGraph visualizer.
    - `network_audio_player.py`: Zero-latency live audio output player.
 
-## 🛠️ 1. Kurulum (Installation)
+## 🛠️  Kurulum (Installation)
 
 Linux ortamında gerekli sistem paketlerini kurun, projeyi derleyin ve Python ortamını hazırlayın:
 
@@ -31,21 +31,21 @@ Linux ortamında gerekli sistem paketlerini kurun, projeyi derleyin ve Python or
     source .venv/bin/activate
     pip install numpy sounddevice pyqtgraph PyQt5
 
-## 🚀 2. Nasıl Çalıştırılır? (Step-by-Step Usage Guide)
+## 🚀  Nasıl Çalıştırılır? (Step-by-Step Usage Guide)
 
 Bu proje bir arayüz (GUI) yerine paralel çalışan servislerden oluşur. Sistemi çalıştırmak için **3 ayrı terminal sekmesi** açın ve aşağıdaki sırayı takip edin (**Önce Python alıcılarını başlatın, en son C# motorunu çalıştırın.** Yankı olmaması için kulaklık kullanmanız önerilir):
 
-**1. Terminal — Canlı Ses Oynatıcı (UDP Port 5006):**
+    Terminal — Canlı Ses Oynatıcı (UDP Port 5006):**
 
     source .venv/bin/activate
     python3 network_audio_player.py
 
-**2. Terminal — Canlı Osiloskop Ekranı (UDP Port 5005 - İsteğe Bağlı):**
+    Terminal — Canlı Osiloskop Ekranı (UDP Port 5005 - İsteğe Bağlı):**
 
     source .venv/bin/activate
     python3 oscilloscope.py
 
-**3. Terminal — Ana C# Ses İşleme Motoru:**
+    Terminal — Ana C# Ses İşleme Motoru:**
 
     dotnet run --project NoiseReductionEngine.CLI
 
