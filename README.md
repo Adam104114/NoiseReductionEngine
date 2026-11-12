@@ -1,4 +1,4 @@
-# NoiseReductionEngine 🎙️⚡
+# NoiseReductionEngine 
 
 A high-performance, real-time noise reduction and remote audio streaming engine built with **C# (.NET 8)**, **Linux ALSA Native Interop**, **Triple-Stage DSP (Time & Frequency Domain)**, and **Python**.
 
