@@ -53,7 +53,7 @@ Bu proje bir arayüz (GUI) yerine paralel çalışan servislerden oluşur. Siste
 
 Ortam gürültüsüne göre filtre hassasiyetini `NoiseReductionEngine.CLI/Program.cs` dosyasından özelleştirebilirsiniz:
 - **Noise Gate Threshold (default: 600):** Sessiz ortamlarda `200-300` seviyesine düşürün; gürültülü ortamlarda `800-1000` seviyesine çıkarın.
-- **FFT Band-Pass Cutoff (default: 80 Hz - 4000 Hz):** İnsan sesi frekans aralığı için optimize edilmiştir.
+- **FFT Band-Pass Cutoff (default: 120 Hz - 4000 Hz):** İnsan sesi frekans aralığı için optimize edilmiştir.
 
 ## 📂 Project Structure
 
