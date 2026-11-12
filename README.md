@@ -1,48 +1,68 @@
 # NoiseReductionEngine 🎙️⚡
 
-A high-performance, real-time noise reduction system built with **C# (.NET 8)**, **Linux ALSA Native Interop**, **Triple-Stage DSP (Time & Frequency Domain)**, and **UDP Remote Audio Streaming**.
-
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![NET](https://img.shields.io/badge/.NET-8.0-purple.svg)
-![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20ALSA-orange.svg)
-
----
+A high-performance, real-time noise reduction and remote audio streaming engine built with **C# (.NET 8)**, **Linux ALSA Native Interop**, **Triple-Stage DSP (Time & Frequency Domain)**, and **Python**.
 
 ## 📌 Architecture Overview
 
-`NoiseReductionEngine` follows **Clean Architecture** principles to separate low-level Linux audio capture, high-performance signal processing, and low-latency network delivery.
+NoiseReductionEngine follows Clean Architecture principles to separate low-level Linux audio capture, real-time digital signal processing, and UDP network delivery:
 
-```text
-[ Hardware: Microphone ]
-           │
-           ▼
-┌─────────────────────────────────────────────────────────┐
-│    INFRASTRUCTURE LAYER (Native Hardware Interop)       │
-│    • AlsaAudioCaptureService (libasound.so.2 P/Invoke)  │
-│    • 16-bit PCM (44.1 kHz, Mono) Buffer Stream          │
-└──────────────────────────┬──────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│    CORE LAYER (Triple DSP & Frequency Domain Pipeline)  │
-│    • MovingAverageFilter (Time-Domain Smoothing)        │
-│    • NoiseGateFilter (Threshold Level Suppression)      │
-│    • FftSpectrumFilter (MathNet Forward/Inverse FFT)    │
-│      └─► Band-Pass: 80 Hz - 4000 Hz                     │
-└──────────────────────────┬──────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│    INFRASTRUCTURE LAYER (Network Streaming Services)    │
-│    • UdpSignalStreamService (Oscilloscope Stream - 5005)│
-│    • NetworkAudioStreamService (Header + PCM - 5006)    │
-│      └─► Header: Sequence No (4B) + Timestamp (8B)      │
-└──────────────────────────┬──────────────────────────────┘
-                           │
-         ┌─────────────────┴─────────────────┐
-         ▼                                   ▼
-┌─────────────────┐                 ┌──────────────────┐
-│ Python Client 1 │                 │ Python Client 2  │
-│ oscilloscope.py │                 │ network_player.py│
-│ (PyQtGraph GUI) │                 │ (Live Audio Out) │
-└─────────────────┘                 └──────────────────┘
+1. **Infrastructure Layer (Native Hardware Interop):** `AlsaAudioCaptureService` captures raw 16-bit PCM (44.1 kHz, Mono) audio directly via `libasound.so.2` (P/Invoke).
+2. **Core Layer (Triple DSP Pipeline):**
+   - `MovingAverageFilter`: Time-domain high-frequency spike smoothing.
+   - `NoiseGateFilter`: Low-amplitude background noise suppression during silence.
+   - `FftSpectrumFilter`: MathNet Forward/Inverse FFT Band-Pass filter (80 Hz - 4000 Hz) isolating human voice and suppressing hum/hiss.
+3. **Infrastructure Layer (Network Streaming):**
+   - `UdpSignalStreamService`: Streams raw and filtered waveforms to UDP Port `5005`.
+   - `NetworkAudioStreamService`: Streams 12-byte custom header (`SequenceNumber` + `Timestamp`) + PCM audio to UDP Port `5006`.
+4. **Python Clients:**
+   - `oscilloscope.py`: 100 FPS real-time PyQtGraph visualizer.
+   - `network_audio_player.py`: Zero-latency live audio output player.
+
+## 🛠️ 1. Kurulum (Installation)
+
+Linux ortamında gerekli sistem paketlerini kurun, projeyi derleyin ve Python ortamını hazırlayın:
+
+    sudo apt update
+    sudo apt install -y build-essential libasound2-dev libportaudio2 python3-venv
+    git clone [https://github.com/Adam104114/NoiseReductionEngine.git](https://github.com/Adam104114/NoiseReductionEngine.git)
+    cd NoiseReductionEngine
+    dotnet build NoiseReductionEngine.sln
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install numpy sounddevice pyqtgraph PyQt5
+
+## 🚀 2. Nasıl Çalıştırılır? (Step-by-Step Usage Guide)
+
+Bu proje bir arayüz (GUI) yerine paralel çalışan servislerden oluşur. Sistemi çalıştırmak için **3 ayrı terminal sekmesi** açın ve aşağıdaki sırayı takip edin (**Önce Python alıcılarını başlatın, en son C# motorunu çalıştırın.** Yankı olmaması için kulaklık kullanmanız önerilir):
+
+**1. Terminal — Canlı Ses Oynatıcı (UDP Port 5006):**
+
+    source .venv/bin/activate
+    python3 network_audio_player.py
+
+**2. Terminal — Canlı Osiloskop Ekranı (UDP Port 5005 - İsteğe Bağlı):**
+
+    source .venv/bin/activate
+    python3 oscilloscope.py
+
+**3. Terminal — Ana C# Ses İşleme Motoru:**
+
+    dotnet run --project NoiseReductionEngine.CLI
+
+## 🔧 Calibration & Fine-Tuning (Program.cs)
+
+Ortam gürültüsüne göre filtre hassasiyetini `NoiseReductionEngine.CLI/Program.cs` dosyasından özelleştirebilirsiniz:
+- **Noise Gate Threshold (default: 600):** Sessiz ortamlarda `200-300` seviyesine düşürün; gürültülü ortamlarda `800-1000` seviyesine çıkarın.
+- **FFT Band-Pass Cutoff (default: 80 Hz - 4000 Hz):** İnsan sesi frekans aralığı için optimize edilmiştir.
+
+## 📂 Project Structure
+
+- `NoiseReductionEngine.Core/` — DSP Interfaces, Models & Filters (FFT, Gate, Smoothing)
+- `NoiseReductionEngine.Infrastructure/` — ALSA Hardware Interop & UDP Network Streamers
+- `NoiseReductionEngine.CLI/` — Engine Application Pipeline & Execution Entrypoint
+- `oscilloscope.py` — Real-time PyQtGraph Dual-Waveform Visualizer
+- `network_audio_player.py` — UDP Live Audio Output Client
+
+## 📜 License
+
+Distributed under the MIT License.
