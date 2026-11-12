@@ -1,0 +1,6 @@
+bin/
+obj/
+.vscode/
+venv/
+__pycache__/
+*.user
