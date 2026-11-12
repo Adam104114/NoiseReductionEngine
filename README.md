@@ -35,17 +35,17 @@ Linux ortamında gerekli sistem paketlerini kurun, projeyi derleyin ve Python or
 
 Bu proje bir arayüz (GUI) yerine paralel çalışan servislerden oluşur. Sistemi çalıştırmak için **3 ayrı terminal sekmesi** açın ve aşağıdaki sırayı takip edin (**Önce Python alıcılarını başlatın, en son C# motorunu çalıştırın.** Yankı olmaması için kulaklık kullanmanız önerilir):
 
-    Terminal — Canlı Ses Oynatıcı (UDP Port 5006):**
+    Terminal1 — Canlı Ses Oynatıcı (UDP Port 5006):**
 
     source .venv/bin/activate
     python3 network_audio_player.py
 
-    Terminal — Canlı Osiloskop Ekranı (UDP Port 5005 - İsteğe Bağlı):**
+    Terminal2 — Canlı Osiloskop Ekranı (UDP Port 5005 - İsteğe Bağlı):**
 
     source .venv/bin/activate
     python3 oscilloscope.py
 
-    Terminal — Ana C# Ses İşleme Motoru:**
+    Terminal3 — Ana C# Ses İşleme Motoru:**
 
     dotnet run --project NoiseReductionEngine.CLI
 
